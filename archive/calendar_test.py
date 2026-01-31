@@ -58,8 +58,16 @@ def main():
         print(f"Today's events ({len(events)}):\n")
         for event in events:
             # YOUR TASK: extract and print each event
+            print(event["summary"])
+            
+            startTime = datetime.fromisoformat(event["start"]["dateTime"].replace("Z", ""))
+            endTime = datetime.fromisoformat(event["end"]["dateTime"].replace("Z", ""))
+            print(f"{startTime.strftime("%H:%M")} - {endTime.strftime("%H:%M")}")
+
+            print(event.get("location", ""))
+
             # Hint: print the whole event first to see its structure
-            print(event)
+            # print(event)
             print()  # blank line between events
 
 if __name__ == "__main__":

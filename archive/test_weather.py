@@ -1,31 +1,18 @@
 import requests
+import json 
 import os
 from dotenv import load_dotenv
 import time
-import json
-import yaml
-from modules.cache import get_cached_data, save_to_cache
-
-def load_config():
-    with open("config.yaml", "r") as f:
-        return yaml.safe_load(f)
-    
-config = load_config()
 
 load_dotenv()
 
 API_KEY = os.getenv("OPENWEATHER_API_KEY")
 
-lat = config["weather"]["lat"]
-lon = config["weather"]["lon"]
-cache_time = config["weather"]["cache_duration"]
-
+lat = 53.3498
+lon = -6.2603
 
 def get_weather():
     url = f"https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={API_KEY}&units=metric"
-    cached = get_cached_data("cache/weather.json", cache_time)
-    if cached: 
-        return cached
     try:
         response = requests.get(url)
         if response.status_code == 200:
@@ -38,9 +25,9 @@ def get_weather():
             sunrise = weather["sys"]["sunrise"]
             sunset = weather["sys"]["sunset"]
 
-            sunrise = time.strftime('%H:%M', time.localtime(sunrise))
-            sunset = time.strftime('%H:%M', time.localtime(sunset))
-            result = {
+            sunrise = time.strftime('%d-%m-%Y %H:%M:%S', time.localtime(sunrise))
+            sunset = time.strftime('%d-%m-%Y %H:%M:%S', time.localtime(sunset))
+            return {
                 "temp": temp,
                 "temp_max":temp_max,
                 "temp_min":temp_min,
@@ -48,10 +35,6 @@ def get_weather():
                 "sunrise":sunrise,
                 "sunset":sunset
             }
-
-            # save to cache
-            save_to_cache("cache/weather.json", result)
-            return result
         else:
             print("Error", response.status_code)
             return None
@@ -59,3 +42,20 @@ def get_weather():
         print("Error", e)
         return None
     
+# def main():
+#     weather = get_weather()
+#     if weather:
+
+
+#         print(f"Current Temperature: {temp}°C")
+#         print(f"High: {temp_max}°C, Low: {temp_min}°C")
+#         print(f"Conditions: {description}")
+#         print(f"Sunrise: {sunrise}")
+#         print(f"Sunset: {sunset}")
+
+#     else:
+#         print("Failed to fetch posts from API.")
+    
+# if __name__ == '__main__':
+#     main()
+
