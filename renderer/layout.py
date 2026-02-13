@@ -1,7 +1,6 @@
 from PIL import Image, ImageDraw, ImageFont
 from datetime import datetime
 from modules.config import load_config
-from modules.weather import get_rain_chance
 
 font_big = ImageFont.truetype("fonts/MonospaceBold.ttf",28)
 font_medium = ImageFont.truetype("fonts/Monospace.ttf",20)
@@ -62,7 +61,6 @@ def render_dashboard(weather, transport, calendar, rain):
     x = draw_text_get_width(draw, x-10, y, f"{weather['temp_min']}°C", font_bold_bigger)
 
     y += 25
-    # y += 30
 # sunrise & sunset
     x = padding
     x = draw_text_get_width(draw, x, y+3, "Sunrise: ", font_medium)
@@ -89,6 +87,7 @@ def render_dashboard(weather, transport, calendar, rain):
     y += 10
     draw.line((0,y,column,y), fill=0, width=2)
     y+= 10
+
 # Rain Graph
     draw.text((padding, y), "Rain Forecast", font=font_bold, fill=0)
     y += 20
@@ -99,23 +98,20 @@ def render_dashboard(weather, transport, calendar, rain):
 # Calendar
     right_x = column+padding
     draw.text((right_x, right_col_y), "Calendar: ", font = font_big, fill = 0)
-    right_col_y+=30
+    right_col_y+=40
     for event in calendar["events"]:
+        box_padding = 5
         draw.text((right_x,right_col_y), f"{event['summary']}", font=font_calendar, fill=0)
+        bbox = draw.textbbox((right_x,right_col_y), f"{event['summary']}", font=font_calendar)
         right_col_y+=20
         draw.text((right_x,right_col_y), f"{event['startTime']}  -  {event['endTime']}", font=font_medium, fill=0)
+        bboxTime = draw.textbbox((right_x,right_col_y), f"{event['startTime']}  -  {event['endTime']}", font=font_medium)
+        draw.rectangle((bbox[0]-box_padding,  bbox[1]-box_padding,  max(bbox[2],bboxTime[2])+box_padding, bboxTime[3]+box_padding) )
+
         right_col_y+=40
 
     return img
 
-
-    # # after x=400 i want to have some nudges - "its cold! wear a coat" etc. maybe a small figure guy...
-
-
-
-
-
-    # return img
 
 def draw_rain_graph(draw, x, y, width, height, hourly_data):
     x, y, width, height = int(x), int(y), int(width), int(height)
@@ -124,11 +120,8 @@ def draw_rain_graph(draw, x, y, width, height, hourly_data):
         draw.text((x, y), "No forecast data", font=font_medium, fill=0)
         return
     
-    # Draw scale on left side
-
     draw.text((x, y + height - 10), "0%", font=font_small, fill=0)
     
-    # Offset bars to make room for scale
     graph_x = x + 30
     graph_width = width - 40
     
@@ -174,8 +167,6 @@ def draw_rain_graph(draw, x, y, width, height, hourly_data):
 
     if len(line_points)>1:
         draw.line(line_points, fill=0, width=3)
-
-
 
 def draw_text_get_width(draw, x, y, text, font):
     draw.text((x, y), text, font=font, fill=0)

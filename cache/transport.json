@@ -1,1 +1,1 @@
-{"stop": "The Gallops", "inbound": [{"destination": "Parnell", "due": "DUE"}, {"destination": "Parnell", "due": "24"}], "outbound": [{"destination": "Brides Glen", "due": "7"}, {"destination": "Brides Glen", "due": "20"}, {"destination": "Brides Glen", "due": "32"}]}
+{"stop": "The Gallops", "inbound": [{"destination": "Parnell", "due": "DUE"}, {"destination": "Parnell", "due": "15"}, {"destination": "Parnell", "due": "25"}], "outbound": [{"destination": "Brides Glen", "due": "7"}, {"destination": "Brides Glen", "due": "20"}, {"destination": "Brides Glen", "due": "34"}]}
