@@ -2,14 +2,11 @@ import requests
 import os
 from dotenv import load_dotenv
 import time
-import json
-import yaml
 from modules.cache import get_cached_data, save_to_cache
+from modules.config import load_config
+from datetime import datetime
 
-def load_config():
-    with open("config.yaml", "r") as f:
-        return yaml.safe_load(f)
-    
+
 config = load_config()
 
 load_dotenv()
@@ -20,6 +17,42 @@ lat = config["weather"]["lat"]
 lon = config["weather"]["lon"]
 cache_time = config["weather"]["cache_duration"]
 
+def get_rain_chance():
+    cached = get_cached_data("cache/forecast.json", cache_time)
+    if cached:
+        return cached
+    
+    url = f"https://api.openweathermap.org/data/2.5/forecast?lat={lat}&lon={lon}&appid={API_KEY}&units=metric"
+    
+    try:
+        response = requests.get(url)
+        if response.status_code == 200:
+            data = response.json()
+            today = datetime.now().strftime("%Y-%m-%d")
+            max_pop = 0
+            hourly = []
+            
+            current_pop = hourly[0]["pop"] if hourly else 0
+            current_hour = datetime.now().strftime("%H:%M")
+            hourly.insert(0, {"hour": current_hour, "pop": current_pop})
+            for entry in data["list"]:
+                if entry["dt_txt"].startswith(today):
+                    pop = entry["pop"]
+                    hour = entry["dt_txt"][11:16] 
+                    hourly.append({"hour":hour, "pop":round(pop *100)})
+                    if pop > max_pop:
+                        max_pop = pop
+            
+            result = {
+                "rain_chance": round(max_pop * 100),
+                "hourly": hourly 
+            }
+            save_to_cache("cache/forecast.json", result)
+            return result
+        else:
+            return {"rain_chance": 0, "hourly":[]}
+    except:
+        return {"rain_chance": 0, "hourly":[]}
 
 def get_weather():
     url = f"https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={API_KEY}&units=metric"
